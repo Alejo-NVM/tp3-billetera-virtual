@@ -39,7 +39,7 @@ const Login = () => {
               aud: idTokenClaims.aud,
               iat: idTokenClaims.iat,
               exp: idTokenClaims.exp,
-              email: user.email || 'santiago.daniel.lazos@gmail.com',
+              email: user.email || 'alejomartinez00@hotmail.com',
               name: user.name,
               picture: user.picture,
               nickname: user.nickname || ""

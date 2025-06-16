@@ -13,6 +13,32 @@ const VerifyAccount = () => {
   const [alias, setAlias] = useState(userData.username || '');
   const [codigo, setCodigo] = useState('');
   const [loading, setLoading] = useState(false);
+  const [verificando, setVerificando] = useState(true); // 🔧 ¡AHORA BIEN UBICADO!
+
+  useEffect(() => {
+    const verificarEstado = async () => {
+      if (!alias) {
+        setVerificando(false);
+        return;
+      }
+
+      try {
+        const response = await axios.get(`https://raulocoin.onrender.com/api/users/${alias}`);
+        const { isVerified } = response.data;
+
+        if (isVerified) {
+          navigate('/account');
+        } else {
+          setVerificando(false); // Solo mostramos el formulario si no está verificado
+        }
+      } catch (error) {
+        console.error("Error al verificar estado de cuenta:", error);
+        setVerificando(false);
+      }
+    };
+
+    verificarEstado();
+  }, [alias, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,6 +83,11 @@ const VerifyAccount = () => {
       setLoading(false);
     }
   };
+
+  // 👇 Este bloque evita que se vea el formulario mientras se está verificando automáticamente
+  if (verificando) {
+    return <p>Cargando verificación de cuenta...</p>;
+  }
 
   return (
     <div className="login-container">

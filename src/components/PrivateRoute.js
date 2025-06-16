@@ -14,6 +14,7 @@ const PrivateRoute = ({ children }) => {
   } = useAuth0();
 
   const [authDone, setAuthDone] = useState(false);
+  const [verificado, setVerificado] = useState(false); // Estado nuevo
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,7 +31,7 @@ const PrivateRoute = ({ children }) => {
               aud: idTokenClaims.aud,
               iat: idTokenClaims.iat,
               exp: idTokenClaims.exp,
-              email: user.email || 'santiago.daniel.lazos@gmail.com',
+              email: user.email,
               name: user.name,
               picture: user.picture,
               nickname: user.nickname || ""
@@ -41,27 +42,17 @@ const PrivateRoute = ({ children }) => {
             },
           };
 
-          console.log('Datos a enviar a la API:', data);
           const response = await auth0Authenticate(data);
-          console.log('Respuesta del backend:', response);
-
           localStorage.setItem('userData', JSON.stringify(response.user));
-
-          /* if (response.needsTotpSetup) {
-            navigate('/verify-account', {
-              state: { alias: response.user.username },
-            });
-          } */
-
-
+          
+          
           setAuthDone(true);
-console.log(response.user);
-                  if (response.user.isVerified === true) {
-            console.log("Entro");
-            navigate("/Account");
-        } else {
-/*             que valla a la pagina de verificar
- */        }
+          console.log('authDone seteado a true');
+          if (response.user.isVerified) {
+            setVerificado(true); // ✅ Marcamos como verificado
+          } else {
+            navigate('/verify-account'); // 🚫 Redirigimos a verificación
+          }
         } catch (error) {
           console.error('Error autenticando con Auth0:', error);
         }
@@ -88,11 +79,13 @@ console.log(response.user);
     authDone
   ]);
 
-  if (isLoading || !isAuthenticated) {
+  // Mostrar pantalla de carga si aún no autenticó o no verificó
+  if (isLoading || !isAuthenticated || !authDone) {
     return <div>Cargando...</div>;
   }
 
-  return children;
+  // ✅ Usuario autenticado Y verificado → mostramos componente protegido
+  return verificado ? children : null;
 };
 
 export default PrivateRoute;
